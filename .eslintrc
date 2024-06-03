@@ -1,0 +1,149 @@
+{
+  "plugins": ["react", "simple-import-sort", "unused-imports"],
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "react-app",
+    "airbnb"
+  ],
+  "ignorePatterns": [
+    "*.test.(tsx|js|jsx)",
+    "test/*",
+    "jest.config.js",
+    "dist"
+  ],
+  "parserOptions": {
+    "project": "./tsconfig.json",
+    "ecmaFeatures": {
+      "jsx": true,
+      "arrowFunctions": true,
+      "blockBindings": true,
+      "classes": true,
+      "defaultParams": true,
+      "destructuring": true,
+      "forOf": true,
+      "generators": false,
+      "modules": true,
+      "objectLiteralComputedProperties": true,
+      "objectLiteralDuplicateProperties": false,
+      "objectLiteralShorthandMethods": true,
+      "objectLiteralShorthandProperties": true,
+      "spread": true,
+      "superInFunctions": true,
+      "templateStrings": true,
+      "restParams": true
+    }
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2021": true,
+    "jest": true
+  },
+  "rules": {
+    "array-callback-return": [0],
+    "arrow-parens": ["error", "as-needed"],
+    "class-methods-use-this": "warn",
+    "comma-dangle": ["error", "never"],
+    "function-paren-newline": "off",
+    "import/extensions": [0],
+    "import/no-extraneous-dependencies": [0],
+    "import/no-unresolved": [0],
+    "import/prefer-default-export": [0],
+    "max-len": [1, 180, 2, { "ignoreStrings": true }],
+    "no-console": "off",
+    "no-multiple-empty-lines": ["error", { "max": 1 }],
+    "no-param-reassign": [0],
+    "no-unused-expressions": [0],
+    "object-curly-newline": ["error", {
+      "ObjectExpression": { "multiline": true },
+      "ImportDeclaration": { "multiline": true },
+    }],
+    "object-curly-spacing": ["error", "always"],
+    "object-property-newline": ["error",  {
+      "allowAllPropertiesOnSameLine": true,
+      "allowMultiplePropertiesPerLine": false
+    }],
+    "padding-line-between-statements": [
+      "error",
+      { "blankLine": "always", "prev": "multiline-block-like", "next": "*" },
+      { "blankLine": "always", "prev": "return", "next": "*" },
+      { "blankLine": "always", "prev": "multiline-expression", "next": "*" },
+      { "blankLine": "always", "prev": "switch", "next": "*" }
+    ],
+    "react/forbid-prop-types": ["error", { "forbid": ["any"] }],
+    "react/function-component-definition": [2, { "namedComponents": "arrow-function", "unnamedComponents": "arrow-function" }],
+    "template-curly-spacing": ["error", "never"],
+    "lines-around-comment": ["error", {
+      "beforeBlockComment": true,
+      "beforeLineComment": true,
+      "allowBlockStart": true,
+      "allowBlockEnd": true,
+      "allowObjectStart": true,
+      "allowObjectEnd": true,
+      "allowArrayStart": true,
+      "allowArrayEnd": true
+    }],
+
+    /*
+      * Typscript rules
+      */
+    "@typescript-eslint/comma-dangle": "off",
+    "@typescript-eslint/no-use-before-define": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/lines-between-class-members": ["error", "always", {
+      "exceptAfterSingleLine": true,
+    }],
+
+    /*
+    * React Plugin Rules
+    */
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "react/jsx-filename-extension": [0],
+    "react-hooks/exhaustive-deps": "off",
+    "react/jsx-props-no-spreading": [0],
+    "react/no-children-prop": [0],
+    "react/require-default-props": [2, { "ignoreFunctionalComponents": true }],
+    "react/jsx-max-props-per-line": [1, { "maximum": 1, "when": "multiline" }],
+    "react/button-has-type": "off",
+    "react/jsx-sort-props": [1, {
+      "callbacksLast": true,
+      "shorthandFirst": true,
+      "shorthandLast": true,
+      "ignoreCase": true
+    }],
+
+    /*
+    * Simple Import Sort Plugin Rules
+    */
+    "simple-import-sort/imports": ["error", {
+      "groups": [
+        // Side effect imports.
+        ["^\\u0000"],
+        // Packages. `react` related packages come first.
+        ["^react", "^@?\\w"],
+        // Internal aliases & Parent imports. Put `..` last.
+        [
+          "^src",
+          "^\\.\\.(?!/?$)",
+          "^\\.\\./?$"
+        ],
+        // Other relative imports. Put same-folder imports and `.` last.
+        ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"],
+        // Style imports.
+        ["^.+\\.s?css$"]
+      ]
+    }],
+    "simple-import-sort/exports": "error",
+
+    /*
+    * Unused Imports Plugin Rules
+    */
+    "no-unused-vars": "off", // or "@typescript-eslint/no-unused-vars": "off",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      { "vars": "all", "varsIgnorePattern": "^_", "args": "after-used", "argsIgnorePattern": "^_" }
+    ]
+  }
+}

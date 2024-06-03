@@ -1,0 +1,83 @@
+{
+  "name": "sidellama",
+  "version": "0.0.1",
+  "description": "sidellama",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run clear && webpack -w --config config/webpack.config.js",
+    "clear": "rm -rf dist && rm -rf node_modules/.cache"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com.git"
+  },
+  "keywords": [
+    "sidepanel",
+    "side",
+    "panel",
+    "chrome",
+    "extension"
+  ],
+  "author": "gyopak",
+  "license": "MIT",
+  "bugs": {
+    "url": ""
+  },
+  "homepage": "",
+  "dependencies": {
+    "@chakra-ui/icons": "^2.1.1",
+    "@chakra-ui/react": "^2.7.1",
+    "@emotion/react": "^11.11.4",
+    "@eslint/js": "^9.2.0",
+    "@reduxjs/toolkit": "^1.9.5",
+    "@types/chrome": "^0.0.238",
+    "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.2.6",
+    "@types/redux-logger": "^3.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
+    "babel-preset-react-app": "^10.0.1",
+    "copy-webpack-plugin": "^11.0.0",
+    "dom-to-image": "^2.6.0",
+    "dotenv": "^16.3.1",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-import-resolver-typescript": "^3.5.5",
+    "eslint-import-resolver-webpack": "^0.13.2",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "fetch-event-stream": "^0.1.5",
+    "framer-motion": "^11.1.7",
+    "generate-json-from-js-webpack-plugin": "^0.1.1",
+    "globals": "^15.1.0",
+    "html-to-image": "^1.11.11",
+    "html-webpack-plugin": "^5.5.3",
+    "localforage": "^1.10.0",
+    "logrocket": "^8.1.0",
+    "lowdb": "^7.0.1",
+    "mini-css-extract-plugin": "^2.7.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
+    "react-redux": "^8.1.1",
+    "react-textarea-autosize": "^8.5.3",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.4.2",
+    "ts-loader": "^9.4.3",
+    "typescript": "^5.1.3",
+    "typescript-eslint": "^7.8.0",
+    "webext-redux": "^2.1.9",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "devDependencies": {
+    "@types/dom-to-image": "^2.6.7",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^4.6.2"
+  }
+}
