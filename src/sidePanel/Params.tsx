@@ -75,6 +75,9 @@ export const Params = () => {
         />
       </AccordionButton>
       <AccordionPanel p={2} pt={0}>
+      <Text color="var(--text)" fontSize="md" fontWeight={800} p={2} pt={0} textAlign="left">
+          🚧 under construction 🚧
+        </Text>
         <Text color="var(--text)" fontSize="md" fontWeight={800} p={2} pt={0} textAlign="left">
           {isValid ? 'saved' : 'invalid JSON'}
           !

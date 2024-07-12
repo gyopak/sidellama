@@ -1,5 +1,7 @@
 /* eslint-disable no-undef */
+import React from 'react';
 import { useEffect, useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 import {
   Box,
   Container,
@@ -7,6 +9,9 @@ import {
 } from '@chakra-ui/react';
 import localforage from 'localforage';
 
+import { useChatTitle } from './hooks/useChatTitle';
+import useSendMessage from './hooks/useSendMessage';
+import { useUpdateModels } from './hooks/useUpdateModels';
 import { AddToChat } from './AddToChat';
 import { Background } from './Background';
 import { ChatHistory, ChatMessage } from './ChatHistory';
@@ -15,12 +20,9 @@ import { Header } from './Header';
 import { Input } from './Input';
 import { Messages } from './Messages';
 import { downloadImage, downloadJson, downloadText } from './messageUtils';
-import { fetchDataAsStream, webSearch } from './network';
 import { Send } from './Send';
 import { Settings } from './Settings';
 import { setTheme, themes } from './Themes';
-
-const generateTitle = 'create a short title to our conversation. only answer with the title string, say nothing else but the chat title. use spaces between the words. Here is an example title: New summarizer assignment';
 
 function bridge() {
   const response = JSON.stringify({
@@ -49,17 +51,9 @@ async function injectBridge() {
     });
 }
 
-const configBody = {
-  model: 'llama3-8b-8192',
-  temperature: 1,
-  max_tokens: 1024,
-  top_p: 1,
-  stop: null,
-  stream: true
-};
-
 const generateChatId = () => `chat_${Math.random().toString(16).slice(2)}`;
 
+// eslint-disable-next-line react/prop-types
 const MessageTemplate = ({ children, onClick }) => (
   <Box
     background="var(--bg)"
@@ -69,9 +63,11 @@ const MessageTemplate = ({ children, onClick }) => (
     color="var(--text)"
     cursor="pointer"
     defaultValue="default"
-    fontSize="md"
+    fontSize="lg"
     fontStyle="bold"
     fontWeight={600}
+    mb={3}
+    mr={4}
     overflow="hidden"
     pb={0.5}
     pl={3}
@@ -80,8 +76,6 @@ const MessageTemplate = ({ children, onClick }) => (
     textOverflow="ellipsis"
     whiteSpace="nowrap"
     width="fit-content"
-    mr={4}
-    mb={3}
     onClick={onClick}
   >
     {children}
@@ -95,7 +89,6 @@ const SideLlama = () => {
   const [chatId, setChatId] = useState(generateChatId());
   const [response, setResponse] = useState('');
   const [webContent, setWebContent] = useState('');
-  const [chatTitle, setChatTitle] = useState('');
   const [pageContent, setPageContent] = useState('');
   const [isLoading, setLoading] = useState(false);
   const [settingsMode, setSettingsMode] = useState(false);
@@ -108,71 +101,11 @@ const SideLlama = () => {
     }
   }, 2000);
 
-  const onSend = async () => {
-    if (isLoading || !message) return;
-    setLoading(true);
+  const { chatTitle, setChatTitle } = useChatTitle(isLoading, messages, message);
 
-    const currentMessages = [message, ...messages].map((m, i) => ({
-      content: m,
-      role: i % 2 === 1 ? 'assistant' : 'user'
-    })).reverse();
+  const onSend = useSendMessage(isLoading, message, messages, webContent, config, setMessages, setMessage, setResponse, setWebContent, setPageContent, setLoading);
 
-    let searchRes = '';
-
-    if (config?.chatMode === 'web' && !webContent) {
-      searchRes = await webSearch(message, config?.webMode);
-    }
-
-    const newMessages = ['', message, ...messages];
-    setMessages(newMessages);
-    setMessage('');
-    setResponse('');
-
-    const persona = config?.personas[config?.persona];
-    const pageString = JSON.parse(localStorage.getItem('pagestring') || '{}');
-    const pageHtml = JSON.parse(localStorage.getItem('pagehtml') || '{}');
-    const currentPageContent = config?.chatMode === 'page' && (config?.pageMode === 'html' ? pageHtml : pageString);
-
-    const charLimit = 1000 * (config?.contextLimit || 1);
-    const limitedContent = charLimit && currentPageContent?.substr?.(0, charLimit);
-    const unlimitedContent = config?.contextLimit === 50 && currentPageContent;
-
-    const webLimit = 1000 * (config?.webLimit || 1);
-    const limitedWebResult = charLimit && searchRes?.substr?.(0, webLimit);
-    const unlimitedWebresults = config?.webLimit === 50 && searchRes;
-
-    if (unlimitedWebresults || limitedWebResult) setWebContent(unlimitedWebresults || limitedWebResult as string);
-    if (unlimitedContent || limitedContent) setPageContent(unlimitedContent || limitedContent);
-
-    const pageChat = unlimitedContent || limitedContent;
-    const webChat = unlimitedWebresults || limitedWebResult;
-
-    const content = `
-      ${persona}
-      ${pageChat && `. here is the page content: ${pageChat}`}
-      ${webChat && `. here is a quick web search result about the topic (refer to this as your quick web search): ${webChat}`}
-    `;
-
-    fetchDataAsStream(
-      {
-        ...configBody,
-        model: config?.selectedModel,
-        messages: [
-          { role: 'system', content },
-          ...currentMessages
-        ]
-      },
-      (part: string, isFinished: boolean) => {
-        if (isFinished) {
-          setResponse(part);
-          setLoading(false);
-        } else {
-          setResponse(part || '');
-        }
-      },
-      { Authorization: `Bearer ${config?.groqApiKey}` }
-    );
-  };
+  useUpdateModels();
 
   const reset = () => {
     setMessages([]);
@@ -195,6 +128,7 @@ const SideLlama = () => {
   useEffect(() => {
     const theme = localStorage.getItem('theme') || 'moss';
     setTheme(themes.find(({ name }) => name === theme) || themes[0]);
+    updateConfig({ chatMode: undefined })
   }, []);
 
   useEffect(() => {
@@ -203,29 +137,6 @@ const SideLlama = () => {
       setMessages([response, ...others]);
     }
   }, [response]);
-
-  useEffect(() => {
-    if (!isLoading && messages.length > 3 && !chatTitle && config?.generateTitle) {
-      const currentMessages = [message, ...messages].map((m, i) => ({
-        content: m || generateTitle,
-        role: i % 2 === 1 ? 'assistant' : 'user'
-      })).reverse();
-
-      fetchDataAsStream(
-        {
-          ...configBody,
-          model: config?.selectedModel,
-          messages: [
-            ...currentMessages
-          ]
-        },
-        (part: string) => {
-          if (part) setChatTitle(part.replace('"', '').replace('"', '').replace('# ', '').trim());
-        },
-        { Authorization: `Bearer ${config?.groqApiKey}` }
-      );
-    }
-  }, [isLoading]);
 
   const loadChat = (chat: ChatMessage) => {
     setChatTitle(chat.title);
@@ -272,15 +183,15 @@ const SideLlama = () => {
         />
         {settingsMode && <Settings />}
         {!settingsMode && !historyMode && messages.length > 0 && (
-        <Messages
-          isLoading={isLoading}
-          messages={messages}
-          settingsMode={settingsMode}
-          onReload={onReload}
-        />
+          <Messages
+            isLoading={isLoading}
+            messages={messages}
+            settingsMode={settingsMode}
+            onReload={onReload}
+          />
         )}
         {!settingsMode && !historyMode && messages.length === 0 && !config?.chatMode && (
-          <Box position="absolute" bottom="4rem" left="0.5rem">
+          <Box bottom="4rem" left="0.5rem" position="absolute">
             <MessageTemplate onClick={() => {
               updateConfig({ chatMode: 'web' });
             }}
@@ -292,6 +203,22 @@ const SideLlama = () => {
             }}
             >
               chat about page
+            </MessageTemplate>
+          </Box>
+        )}
+        {!settingsMode && !historyMode && messages.length === 0 && config?.chatMode === "page" && (
+          <Box bottom="4rem" left="0.5rem" position="absolute">
+            <MessageTemplate onClick={async () => {
+              await onSend('extract data');
+            }}
+            >
+              extract data
+            </MessageTemplate>
+            <MessageTemplate onClick={async () => {
+              await onSend('summarize content');
+            }}
+            >
+              summarize content
             </MessageTemplate>
           </Box>
         )}
@@ -312,8 +239,31 @@ const SideLlama = () => {
           </Box>
         )}
         {historyMode && <ChatHistory loadChat={loadChat} />}
-        <Background />
+        {config?.backgroundImage ? <Background /> : null}
       </Box>
+      <Toaster
+        containerStyle={{
+          borderRadius: 16,
+        }}
+        toastOptions={{
+          duration: 2000,
+          position: "bottom-center",
+          style: {
+            background: '#363636',
+            color: '#fff',
+            fontSize: "1.25rem",
+          },
+
+          // Default options for specific types
+          success: {
+            duration: 2000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+              fontSize: "1.25rem",
+            },
+          },
+        }} />
     </Container>
   );
 };

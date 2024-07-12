@@ -1,15 +1,15 @@
 import React from 'react';
 import { Box } from '@chakra-ui/react';
 
-export const VersionInfo = () => (
+export const Docs = () => (
   <Box
     border="2px"
-    cursor="pointer"
-    onClick={() => window.open("https://github.com/gyopak/sidellama/releases", "_blank")}
     borderColor="var(--text)"
     borderRadius={16}
     color="var(--text)"
     defaultValue="default"
+    cursor="pointer"
+    onClick={() => window.open("https://github.com/gyopak/sidellama/blob/master/DOCS.md", "_blank")}
     fontSize="md"
     background="var(--bg)"
     fontStyle="bold"
@@ -20,6 +20,6 @@ export const VersionInfo = () => (
     pt={0.5}
     mr={3}
   >
-    v0.0.1
+    docs
   </Box>
 );

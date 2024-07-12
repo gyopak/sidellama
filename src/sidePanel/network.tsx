@@ -1,6 +1,5 @@
 // Fetching data using readable stream
 import { events } from 'fetch-event-stream';
-import { browser } from 'globals';
 
 // clean url ending if it with /
 export const cleanUrl = (url: string) => {
@@ -50,7 +49,7 @@ export const webSearch = async (query: string, webMode: string) => {
 
   const abortController = new AbortController();
   setTimeout(() => abortController.abort(), 15000);
-  let formData = new FormData();
+  const formData = new FormData();
   formData.append('q', query);
 
   const htmlString = await fetch(
@@ -66,24 +65,14 @@ export const webSearch = async (query: string, webMode: string) => {
   return htmlDoc.body.innerText.replace(/\s\s+/g, ' ');
 };
 
-export async function fetchData(data: any, headers = {}) {
-  try {
-    const url = 'https://api.groq.com/openai/v1/chat/completions';
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...headers },
-      body: JSON.stringify({ ...data, stream: false })
-    });
-    const json = await response.json();
-    return json;
-  } catch (error) {
-    return error;
+export async function fetchDataAsStream(url: string, data: any, onMessage: any, headers = {}, host: string) {
+  if (url.includes('localhost')) {
+    await urlRewriteRuntime(cleanUrl(url));
   }
-}
 
-export async function fetchDataAsStream(data: any, onMessage: any, headers = {}) {
+  console.log(url, host, data)
+
   try {
-    const url = 'https://api.groq.com/openai/v1/chat/completions';
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...headers },
@@ -95,23 +84,72 @@ export async function fetchDataAsStream(data: any, onMessage: any, headers = {})
       throw new Error('Network response was not ok');
     }
 
-    const stream = events(response);
     let str = '';
-    for await (const event of stream) {
-      try {
-        
-        const received = JSON.parse(event.data);
-        const err = received?.['x_groq']?.error
-        if (err) {
-          onMessage(`Error: ${err}`, true);
-          return
-        }
-        str += received?.choices?.[0]?.delta?.content || '';
 
+    if (host === "ollama") {
+      if (!response.body) return;
+      const reader = response.body.getReader();
+
+      let done;
+      let value;
+      while (!done) {
+        ({ value, done } = await reader.read());
+        if (done) {
+          onMessage(str, true);
+        }
+        const data = new TextDecoder().decode(value)
+        try {
+          const parsed = JSON.parse(data);
+        } catch {
+          onMessage(str || '');
+        }
+        str += parsed?.message?.content;
         onMessage(str || '');
-      } catch (error) {
-        onMessage(`${error}`, true);
-        console.error('Error fetching data:', error);
+      }
+
+      onMessage(str, true);
+    }
+
+    if (host === "lmStudio") {
+      const stream = events(response);
+      for await (const event of stream) {
+        try {
+          const received = JSON.parse(event.data || '');
+          console.log(event)
+          const err = received?.x_groq?.error;
+          if (err) {
+            onMessage(`Error: ${err}`, true);
+            return;
+          }
+
+          str += received?.choices?.[0]?.delta?.content || '';
+
+          onMessage(str || '');
+        } catch (error) {
+          onMessage(`${error}`, true);
+          console.error('Error fetching data:', error);
+        }
+      }
+    }
+
+    if (host === "groq") {
+      const stream = events(response);
+      for await (const event of stream) {
+        try {
+          const received = JSON.parse(event.data || '');
+          const err = received?.x_groq?.error;
+          if (err) {
+            onMessage(`Error: ${err}`, true);
+            return;
+          }
+
+          str += received?.choices?.[0]?.delta?.content || '';
+
+          onMessage(str || '');
+        } catch (error) {
+          onMessage(`${error}`, true);
+          console.error('Error fetching data:', error);
+        }
       }
     }
 

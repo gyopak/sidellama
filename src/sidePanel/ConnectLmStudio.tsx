@@ -6,40 +6,39 @@ import { Box, Button, IconButton, Input } from '@chakra-ui/react';
 import { useConfig } from './ConfigContext';
 import toast from 'react-hot-toast';
 
-export const ConnectOllama = () => {
+export const ConnectLmStudio = () => {
   const { config, updateConfig } = useConfig();
-  const [url, setUrl] = useState(config?.ollamaUrl || 'http://localhost:11434');
+  const [url, setUrl] = useState(config?.lmStudioUrl || 'http://localhost:1234');
   const onConnect = () => {
-    fetch(`${url}/api/tags`)
+    fetch(`${url}/v1/models`)
       .then(res => res.json())
       .then(data => {
         if (data?.error) {
           updateConfig({
-            ollamaError: data?.error?.message,
-            ollamaConnected: false
+            lmStudioError: data?.error?.message,
+            lmStudioConnected: false
           });
-          toast.error(data.error);
+          toast.error(data.error.message);
         } else {
           updateConfig({
-            ollamaConnected: true,
-            ollamaUrl: url,
-            groqError: undefined
+            lmStudioConnected: true,
+            lmStudioUrl: url,
+            lmStudioError: undefined
           });
-
-          toast.success('connected to ollama');
+          toast.success("connected to LM Studio")
         }
       })
       .catch(err => {
         toast.error(err.message);
 
         updateConfig({
-          ollamaError: err,
-          ollamaConnected: false
+          lmStudioError: err,
+          lmStudioConnected: false
         });
       });
   };
 
-  const isConnected = config?.ollamaConnected && config?.ollamaUrl === url;
+  const isConnected = config?.lmStudioConnected && config?.lmStudioUrl === url;
   return (
     <Box display="flex" mb={4} ml={4} mr={4}>
       <Input

@@ -1,14 +1,16 @@
 import React from 'react';
-import { AccordionButton, AccordionItem, AccordionPanel, Text } from '@chakra-ui/react';
-
-import { ConnectGemini } from './ConnectGemini';
+import { ExternalLinkIcon } from '@chakra-ui/icons';
+import { AccordionButton, AccordionItem, AccordionPanel, Link, Text } from '@chakra-ui/react';
 import { ConnectGroq } from './ConnectGroq';
 import { ConnectOllama } from './ConnectOllama';
 import { SettingTitle } from './SettingsTitle';
+import { ConnectClaude } from './ConnectClaude';
+import { ConnectLmStudio } from './ConnectLmStudio';
 
 type ConnectionProps = {
   title: string;
   Component: React.FC<any>;
+  link?: string;
 };
 
 const borderStyle: string = '2px solid var(--text)';
@@ -21,9 +23,19 @@ const textStyle = {
   color: 'var(--text)'
 };
 
-const ConnectionSection: React.FC<ConnectionProps> = ({ title, Component }) => (
+const ConnectionSection: React.FC<ConnectionProps> = ({ title, Component, link }) => (
   <>
-    <Text textAlign="left" {...textStyle}>{title}</Text>
+    <Text textAlign="left" {...textStyle}>
+      {title}
+      {' '}
+      {link && (
+      <Link isExternal fontSize="sm" color="var(--text)" ml="0.5rem" href={link}>
+        api keys
+        {' '}
+        <ExternalLinkIcon mx="2px" />
+      </Link>
+      )}
+    </Text>
     <Component />
   </>
 );
@@ -35,8 +47,9 @@ export const Connect: React.FC = () => (
     </AccordionButton>
     <AccordionPanel p={0}>
       <ConnectionSection Component={ConnectOllama} title="ollama" />
-      <ConnectionSection Component={ConnectGroq} title="groq" />
-      <ConnectionSection Component={ConnectGemini} title="gemini" />
+      <ConnectionSection Component={ConnectLmStudio} title="lm studio" />
+      <ConnectionSection Component={ConnectGroq} title="groq" link="https://console.groq.com/keys" />
+      {/* <ConnectionSection Component={ConnectClaude} title="claude" link="https://console.anthropic.com/settings/keys" /> */}
     </AccordionPanel>
   </AccordionItem>
 );

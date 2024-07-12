@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react/prop-types */
+import React from 'react';
 import {
   DeleteIcon,
   SettingsIcon,
@@ -24,11 +28,15 @@ import { motion } from 'framer-motion';
 
 import { useConfig } from './ConfigContext';
 import { VersionInfo } from './VersionInfo';
+import { Docs } from './Docs';
+import { Support } from './Support';
+import { Donate } from './Donate';
 
+// eslint-disable-next-line react/prop-types
 const WelcomeModal = ({ isOpen, onClose, setSettingsMode }) => (
   <Modal isCentered isOpen={isOpen} scrollBehavior="inside" size="sm" onClose={onClose}>
     <ModalOverlay />
-    <ModalContent bg="var(--bg)" borderRadius={16} color="var(--text)" pb={2}>
+    <ModalContent bg="var(--bg)" border="2px solid var(--text)" borderRadius={16} color="var(--text)" pb={2}>
       <ModalHeader textAlign="center">👋 welcome to sidellama 👋</ModalHeader>
       <ModalBody>
         <Text color="var(--text)" fontSize="md" fontWeight={600} textAlign="center">
@@ -38,7 +46,7 @@ const WelcomeModal = ({ isOpen, onClose, setSettingsMode }) => (
           <Button
             _hover={{ background: 'var(--active)', border: '2px solid var(--text)' }}
             background="var(--active)"
-            border="2px solid var(--active)"
+            border="2px solid var(--text)"
             borderRadius={16}
             color="var(--text)"
             leftIcon={<SettingsIcon />}
@@ -54,6 +62,7 @@ const WelcomeModal = ({ isOpen, onClose, setSettingsMode }) => (
   </Modal>
 );
 
+// eslint-disable-next-line react/prop-types
 const Badge = ({ children }) => (
   <Box
     background="var(--bg)"
@@ -77,6 +86,7 @@ const Badge = ({ children }) => (
   </Box>
 );
 
+// eslint-disable-next-line react/prop-types
 const DrawerHeader = ({ onClose }) => (
   <Box alignItems="center" background="var(--active)" borderBottom="2px solid var(--text)" display="flex" paddingBottom={2} paddingTop={2}>
     <IconButton
@@ -94,6 +104,7 @@ const DrawerHeader = ({ onClose }) => (
   </Box>
 );
 
+// eslint-disable-next-line react/prop-types
 const DrawerSection = ({ title, children }) => (
   <Box borderBottom="2px solid var(--text)" p={2} pb={4}>
     <Text color="var(--text)" fontSize="xl" fontWeight={600} mb={2}>{title}</Text>
@@ -101,6 +112,7 @@ const DrawerSection = ({ title, children }) => (
   </Box>
 );
 
+// eslint-disable-next-line react/prop-types
 const DrawerLinkSection = ({ title, onClick }) => (
   <Box _hover={{ background: 'var(--active)' }} borderBottom="2px solid var(--text)">
     <Text
@@ -116,6 +128,7 @@ const DrawerLinkSection = ({ title, onClick }) => (
   </Box>
 );
 
+// eslint-disable-next-line react/prop-types
 const SettingsDrawer = ({ isOpen, onClose, config, updateConfig, availableModelNames, setSettingsMode, downloadText, downloadJson, downloadImage, setHistoryMode }) => (
   <Drawer isOpen={isOpen} placement="left" size="xs" onClose={onClose}>
     <DrawerOverlay />
@@ -222,7 +235,6 @@ export const Header = ({
     >
       <Box
         alignItems="center"
-        background="var(--active)"
         borderBottom="2px solid var(--text)"
         display="flex"
         justifyContent="space-between"
@@ -274,6 +286,8 @@ export const Header = ({
           </Badge>
           )}
           {!historyMode && settingsMode && <VersionInfo />}
+          {!historyMode && settingsMode && <Docs />}
+          {!historyMode && settingsMode && <Donate />}
           {historyMode && <Badge>chat history</Badge>}
         </Box>
         {!settingsMode && !historyMode && (
