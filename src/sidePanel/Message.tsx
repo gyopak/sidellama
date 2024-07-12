@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import Markdown from 'react-markdown';
-import { Box } from '@chakra-ui/react';
+import { Box, Button } from '@chakra-ui/react';
 
 const Ul = ({ children }: { children: ReactNode }) => (
   <ul style={{ paddingLeft: '2rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>{children}</ul>
@@ -12,9 +12,48 @@ const Pre = ({ children }: { children: ReactNode }) => (
   <pre style={{ overflow: 'scroll', paddingLeft: '1rem', paddingTop: '0.5rem', paddingBottom: '0.5rem', margin: '1rem 0', background: 'var(--text)', color: 'var(--bg)', borderRadius: '16px', maxWidth: '80vw' }}>{children}</pre>
 );
 
-const Code = ({ children }: { children: ReactNode }) => (
-  <code style={{ color: 'var(--bg)', background: 'var(--text)', padding: '2px 7px', borderRadius: '6px' }}>{children}</code>
-);
+const Code = ({ children }: { children: ReactNode }) => {
+  const [copied, setCopied] = useState(false);
+  const copyToClipboard = () => {
+    setCopied(true);
+    console.log(children);
+    navigator.clipboard.writeText(children as string);
+  };
+
+  const inline = (children?.length || 0) > 25;
+
+  return (
+    <>
+      <code style={{
+        color: 'var(--bg)',
+        background: 'var(--text)',
+        paddingLeft: !inline ? '0.5rem' : 0,
+        paddingRight: !inline ? '0.5rem' : 0,
+        borderRadius: '6px'
+      }}
+      >
+        {children}
+      </code>
+      {inline && (
+      <Button
+        background="var(--text)"
+        color="var(--bg)"
+        marginTop="1rem"
+        padding="0.5rem"
+        size="sm"
+        textDecoration="underline"
+        textDecorationThickness="2px"
+        textUnderlineOffset="2px"
+        transform="translateX(-0.5rem)"
+        variant="link"
+        onClick={copyToClipboard}
+      >
+        {copied ? 'copied!' : 'copy to clipboard'}
+      </Button>
+      )}
+    </>
+  );
+};
 
 const A = ({ children, ...props }: { children: ReactNode }) => (
   <a {...props} style={{ color: 'var(--text)', textDecoration: 'underline', padding: '2px 7px', borderRadius: '6px' }} target="_blank">{children}</a>

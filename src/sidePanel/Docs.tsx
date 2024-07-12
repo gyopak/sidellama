@@ -1,12 +1,15 @@
+import React from 'react';
+import { InfoOutlineIcon } from '@chakra-ui/icons';
 import { Box } from '@chakra-ui/react';
 
-export const VersionInfo = () => (
+export const Docs = () => (
   <Box
     border="2px"
     borderColor="var(--text)"
     borderRadius={16}
     color="var(--text)"
     defaultValue="default"
+    onClick={() => window.open("https://github.com/gyopak/sidellama/blob/master/DOCS.md", "_blank")}
     fontSize="md"
     background="var(--bg)"
     fontStyle="bold"
@@ -16,7 +19,8 @@ export const VersionInfo = () => (
     pr={3}
     pt={0.5}
     mr={3}
+    cursor="pointer"
   >
-    v0.0.1
+    docs
   </Box>
 );

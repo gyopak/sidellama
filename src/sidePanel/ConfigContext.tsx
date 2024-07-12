@@ -2,27 +2,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 export const ConfigContext = createContext({});
 
-export const personas = {
-  sidellama: 'you are sidellama, a friendly web assistant',
-  haiku: `you are a haiku generator.
-user: generate a haiku about haiku generation
+export const personas = { sidellama: 'you are sidellama, a friendly web assistant' };
 
-assistant:
-### *Prompt's subtle spark*
-### *AI's gentle, dreaming mind*
-### *Haiku blooms in code*
-
-user: generate a haiku 
-about ducks
-
-assistant:
-### *Feathers glisten bright*
-### *Ripples dance upon the lake*
-### *Quacks echo silence*
-`
-};
-
-const defaultConfig = { personas, generateTitle: true, persona: 'sidellama', webMode: 'brave', webLimit: 1, contextLimit: 1 };
+const defaultConfig = { personas, generateTitle: true, backgroundImage: true, persona: 'sidellama', webMode: 'brave', webLimit: 10, contextLimit: 10 };
 
 export const ConfigProvider = ({ children }: any) => {
   const initialConfig = JSON.parse(localStorage.getItem('config') || JSON.stringify(defaultConfig));

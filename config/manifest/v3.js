@@ -19,7 +19,7 @@ module.exports = {
   "host_permissions": ["<all_urls>"],
   content_security_policy: {
     extension_pages: `
-      default-src 'self' 'unsafe-eval' https://cdn.logr-ingest.com/ http://localhost:* http://127.0.0.1:* https://api.groq.com https://html.duckduckgo.com https://generativelanguage.googleapis.com https://search.brave.com;
+      default-src 'self' 'unsafe-eval' http://localhost:* http://127.0.0.1:* https://api.groq.com https://html.duckduckgo.com https://generativelanguage.googleapis.com https://search.brave.com;
       script-src 'self'; 
       style-src 'self' 'unsafe-inline'
         https://fonts.googleapis.com

@@ -1,65 +1,36 @@
+import React from 'react';
 import { useState } from 'react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import { Box, Button, IconButton, Input, useToast } from '@chakra-ui/react';
+import { Box, Button, IconButton, Input } from '@chakra-ui/react';
 
 import { useConfig } from './ConfigContext';
-
-const GROQ_URL = 'https://api.groq.com/openai/v1/models';
+import { GROQ_URL } from './constants';
+import toast from 'react-hot-toast';
 
 export const ConnectGroq = () => {
   const { config, updateConfig } = useConfig();
   const [apiKey, setApiKey] = useState(config?.groqApiKey);
   const [visibleApiKeys, setVisibleApiKeys] = useState(false);
-  const toast = useToast();
   const onConnect = () => {
     fetch(GROQ_URL, { headers: { Authorization: `Bearer ${apiKey}` } })
       .then(res => res.json())
       .then(data => {
         if (data?.error) {
-          toast({
-            title: `${data?.error?.message}`,
-            status: 'error',
-            isClosable: false,
-            containerStyle: {
-              borderRadius: 16,
-              color: 'var(--text)'
-            }
-          });
+          toast.error(`${data?.error?.message}`)
 
           updateConfig({ groqError: data?.error?.message, groqConnected: false });
         } else {
-          toast({
-            title: 'connected to groq',
-            status: 'success',
-            isClosable: false,
-            styleConfig: {
-              borderRadius: 16,
-              color: 'var(--text)'
-            }
-          });
+          toast.success('connected to groq');
 
-          const otherModels = config?.models?.filter((m: any) => !m?.host || m?.host !== 'groq');
           updateConfig({
             groqApiKey: apiKey,
             groqConnected: true,
-            models: [
-              ...(otherModels || []),
-              ...(data?.data.map((m: any) => ({ ...m, host: 'groq' })) || [])
-            ],
             groqError: undefined
           });
         }
       })
       .catch(err => {
-        toast({
-          title: err.message,
-          status: 'error',
-          isClosable: false,
-          containerStyle: {
-            borderRadius: 16,
-            color: 'var(--text)'
-          }
-        });
+        toast.error(err.message);
       });
   };
 
@@ -89,7 +60,6 @@ export const ConnectGroq = () => {
         mr={4}
         placeholder="GROQ_API_KEY"
         size="sm"
-        style={{ width: '90%' }}
         type={!visibleApiKeys ? 'password' : undefined}
         value={apiKey}
         variant="outline"

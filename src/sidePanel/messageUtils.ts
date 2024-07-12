@@ -10,7 +10,8 @@ export const downloadText = (messages: string[]) => {
 
   const element = document.createElement('a');
   element.setAttribute('href', `data:text/plain;charset=utf-8,${encodeURIComponent(text)}`);
-  element.setAttribute('download', 'chat.txt');
+  const filename = `chat_${(new Date().toJSON().slice(0,10))}.txt`
+  element.setAttribute('download', filename);
 
   element.style.display = 'none';
   document.body.appendChild(element);
@@ -30,7 +31,8 @@ export const downloadJson = (messages: string[]) => {
 
   const element = document.createElement('a');
   element.setAttribute('href', `data:text/plain;charset=utf-8,${encodeURIComponent(text)}`);
-  element.setAttribute('download', 'chat.json');
+  const filename = `chat_${(new Date().toJSON().slice(0,10))}.json`
+  element.setAttribute('download', filename);
 
   element.style.display = 'none';
   document.body.appendChild(element);
@@ -67,7 +69,7 @@ export const downloadImage = (messages: string[]) => {
 
   nodes && toPng(wrapper, {
     filter,
-    pixelRatio: 8,
+    pixelRatio: 4,
     style: { flexGrow: 'unset' },
     backgroundColor: document.documentElement.style.getPropertyValue('--bg')
   })
@@ -76,7 +78,8 @@ export const downloadImage = (messages: string[]) => {
       img.src = dataUrl;
       const element = document.createElement('a');
       element.setAttribute('href', dataUrl);
-      element.setAttribute('download', 'chat.png');
+      const filename = `chat_${(new Date().toJSON().slice(0,10))}.png`
+      element.setAttribute('download', filename);
       element.style.display = 'none';
       document.body.appendChild(element);
       element.click();
