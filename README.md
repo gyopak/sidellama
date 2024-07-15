@@ -40,3 +40,5 @@ Check out [sidellama @ ko-fi](https://ko-fi.com/sidellama)
 ![](/docs/vim.png)
 
 ![](/docs/yt.png)
+
+[![Star History Chart](https://api.star-history.com/svg?repos=gyopak/sidellama&type=Date)](https://star-history.com/#gyopak/sidellama&Date)
