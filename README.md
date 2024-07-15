@@ -14,6 +14,10 @@ tiny browser-augmented chat client for open-source language models.
 
 Check out the [documentation page](/DOCS.md)
 
+## community
+
+Check out the [discord community](https://discord.gg/2pFtRgqp)
+
 ## support 💚
 
 Check out [sidellama @ ko-fi](https://ko-fi.com/sidellama) 
