@@ -11,6 +11,12 @@ chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error: any) => console.error(error));
 
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  const tabId = activeInfo.tabId;
+  console.log('tab activated: ', tabId);
+  injectContentScript(tabId);
+});
+
 chrome.tabs.onUpdated
   .addListener(async (tabId, changeInfo, tab) => {
     if (!(tab.id && changeInfo.status === 'complete')) return;
