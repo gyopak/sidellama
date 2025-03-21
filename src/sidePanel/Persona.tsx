@@ -37,6 +37,9 @@ const AutoResizeTextarea = forwardRef((props, ref) => (
     {...props}
   />
 ));
+AutoResizeTextarea.displayName = 'AutoResizeTextarea';
+
+import PropTypes from 'prop-types';
 
 const SaveButtons = ({ hasChange, buttonColor, onSave, onSaveAs, onCancel }) => {
   const commonButtonStyles = {
@@ -76,6 +79,8 @@ const SaveButtons = ({ hasChange, buttonColor, onSave, onSaveAs, onCancel }) => 
     </Box>
   );
 };
+
+// (Remove this duplicate definition)
 
 const PersonaModal = ({ isOpen, onClose, personaPrompt, personas, updateConfig }) => {
   const [name, setName] = useState('');
@@ -346,6 +351,14 @@ const Persona = () => {
       />
     </AccordionItem>
   );
+};
+
+SaveButtons.propTypes = {
+  hasChange: PropTypes.bool.isRequired,
+  buttonColor: PropTypes.string.isRequired,
+  onSave: PropTypes.func.isRequired,
+  onSaveAs: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
 };
 
 export { AutoResizeTextarea, Persona };

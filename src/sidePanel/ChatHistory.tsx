@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DeleteIcon } from '@chakra-ui/icons';
 import { Box, IconButton, Text } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
@@ -55,7 +55,7 @@ export const ChatHistory = ({ loadChat }) => {
       width="100%"
     >
       {uniqueDates.map(date => (
-        <Box mb="2rem">
+        <Box key={date} mb="2rem">
           <Text
             color="var(--text)"
             fontSize="xl"
@@ -72,6 +72,7 @@ export const ChatHistory = ({ loadChat }) => {
           </Text>
           {messagesWithDates.filter(m => m.date === date).map(message => (
             <Box
+              key={message.id}
               alignItems="center"
               display="flex"
               onMouseEnter={() => setHoverId(message.id)}

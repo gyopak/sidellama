@@ -17,6 +17,7 @@ export const AutoResizeTextarea = React.forwardRef((props, ref) => (
     {...props}
   />
 ));
+AutoResizeTextarea.displayName = 'AutoResizeTextarea';
 
 export const Input = ({
   message,

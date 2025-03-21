@@ -4,7 +4,6 @@ import { AccordionButton, AccordionItem, AccordionPanel, Link, Text } from '@cha
 import { ConnectGroq } from './ConnectGroq';
 import { ConnectOllama } from './ConnectOllama';
 import { SettingTitle } from './SettingsTitle';
-import { ConnectClaude } from './ConnectClaude';
 import { ConnectLmStudio } from './ConnectLmStudio';
 import { ConnectOpenAI } from './ConnectOpenAI';
 import { ConnectGemini } from './ConnectGemini';

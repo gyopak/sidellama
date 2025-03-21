@@ -1,3 +1,4 @@
+import React from 'react';
 import { ArrowRightIcon } from '@chakra-ui/icons';
 import { IconButton, Spinner } from '@chakra-ui/react';
 import { motion } from 'framer-motion';

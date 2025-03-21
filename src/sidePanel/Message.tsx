@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import Markdown from 'react-markdown';
 import { Box, Button } from '@chakra-ui/react';
 
