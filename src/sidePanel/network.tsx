@@ -14,33 +14,40 @@ export const urlRewriteRuntime = async function (
   domain: string,
   type = 'ollama'
 ) {
-  const url = new URL(domain);
-  const domains = [url.hostname];
-  const origin = `${url.protocol}//${url.hostname}`;
-
-  const rules = [
-    {
-      id: 1,
-      priority: 1,
-      condition: { requestDomains: domains },
-      action: {
-        type: 'modifyHeaders',
-        requestHeaders: [
-          {
-            header: 'Origin',
-            operation: 'set',
-            value: origin
-          }
-        ]
-      }
+  try {
+    const url = new URL(domain);
+    // Skip chrome:// URLs
+    if (url.protocol === 'chrome:') {
+      return;
     }
-  ];
-  await chrome.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: rules.map(r => r.id),
+    
+    const domains = [url.hostname];
+    const origin = `${url.protocol}//${url.hostname}`;
 
-    // @ts-ignore
-    addRules: rules
-  });
+    const rules = [
+      {
+        id: 1,
+        priority: 1,
+        condition: { requestDomains: domains },
+        action: {
+          type: 'modifyHeaders',
+          requestHeaders: [
+            {
+              header: 'Origin',
+              operation: 'set',
+              value: origin
+            }
+          ]
+        }
+      }
+    ];
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: rules.map(r => r.id),
+      addRules: rules
+    });
+  } catch (error) {
+    console.debug('URL rewrite skipped:', error);
+  }
 };
 
 export const webSearch = async (query: string, webMode: string) => {
@@ -65,12 +72,20 @@ export const webSearch = async (query: string, webMode: string) => {
   return htmlDoc.body.innerText.replace(/\s\s+/g, ' ');
 };
 
-export async function fetchDataAsStream(url: string, data: any, onMessage: any, headers = {}, host: string) {
+export async function fetchDataAsStream(
+  url: string,
+  data: Record<string, unknown>,
+  onMessage: (message: string, done?: boolean) => void,
+  headers: Record<string, string> = {},
+  host: string
+) {
+  if (url.startsWith('chrome://')) {
+    return; // Skip chrome:// URLs
+  }
+
   if (url.includes('localhost')) {
     await urlRewriteRuntime(cleanUrl(url));
   }
-
-  console.log(url, host, data)
 
   try {
     const response = await fetch(url, {
@@ -79,7 +94,6 @@ export async function fetchDataAsStream(url: string, data: any, onMessage: any, 
       body: JSON.stringify(data)
     });
 
-    // Check if response is ok
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -96,26 +110,39 @@ export async function fetchDataAsStream(url: string, data: any, onMessage: any, 
         ({ value, done } = await reader.read());
         if (done) {
           onMessage(str, true);
+          break;
         }
-        const data = new TextDecoder().decode(value)
+        const chunk = new TextDecoder().decode(value);
+        // Handle [DONE] marker
+        if (chunk.trim() === '[DONE]') {
+          onMessage(str, true);
+          break;
+        }
         try {
-          const parsed = JSON.parse(data);
-        } catch {
-          onMessage(str || '');
+          const parsed = JSON.parse(chunk);
+          if (parsed.message?.content) {
+            str += parsed.message.content;
+            onMessage(str);
+          }
+        } catch (e) {
+          // Ignore JSON parse errors for non-JSON chunks
+          console.debug('Skipping invalid JSON chunk:', chunk);
+          continue;
         }
-        str += parsed?.message?.content;
-        onMessage(str || '');
       }
-
-      onMessage(str, true);
     }
 
     if (host === "lmStudio") {
       const stream = events(response);
       for await (const event of stream) {
+        if (!event.data) continue;
+        // Handle [DONE] marker
+        if (event.data.trim() === '[DONE]') {          onMessage(str, true);
+
+          break;
+        }
         try {
           const received = JSON.parse(event.data || '');
-          console.log(event)
           const err = received?.x_groq?.error;
           if (err) {
             onMessage(`Error: ${err}`, true);
@@ -123,11 +150,11 @@ export async function fetchDataAsStream(url: string, data: any, onMessage: any, 
           }
 
           str += received?.choices?.[0]?.delta?.content || '';
-
           onMessage(str || '');
         } catch (error) {
-          onMessage(`${error}`, true);
-          console.error('Error fetching data:', error);
+          // Skip invalid JSON chunks
+          console.debug('Skipping invalid chunk:', event.data);
+          continue;
         }
       }
     }
@@ -135,6 +162,12 @@ export async function fetchDataAsStream(url: string, data: any, onMessage: any, 
     if (host === "groq") {
       const stream = events(response);
       for await (const event of stream) {
+        if (!event.data) continue;
+        // Handle [DONE] marker
+        if (event.data.trim() === '[DONE]') {          onMessage(str, true);
+
+          break;
+        }
         try {
           const received = JSON.parse(event.data || '');
           const err = received?.x_groq?.error;
@@ -144,11 +177,11 @@ export async function fetchDataAsStream(url: string, data: any, onMessage: any, 
           }
 
           str += received?.choices?.[0]?.delta?.content || '';
-
           onMessage(str || '');
         } catch (error) {
-          onMessage(`${error}`, true);
-          console.error('Error fetching data:', error);
+          // Skip invalid JSON chunks
+          console.debug('Skipping invalid chunk:', event.data);
+          continue;
         }
       }
     }
@@ -156,18 +189,30 @@ export async function fetchDataAsStream(url: string, data: any, onMessage: any, 
     if (host === "gemini") {
       const stream = events(response);
       for await (const event of stream) {
+        if (!event.data) continue;
+
+        // Check if the event data is exactly '[DONE]'
+        if (event.data.trim() === '[DONE]') {
+          onMessage(str, true);
+          break;
+        }
+
         try {
-          const received = JSON.parse(event.data || '');
-          const err = received?.x_gemini?.error;
-          if (err) {
-            onMessage(`Error: ${err}`, true);
-            return;
+          // Only try to parse if it looks like JSON
+          if (typeof event.data === 'string' && event.data.startsWith('{')) {
+            const received = JSON.parse(event.data);
+            const err = received?.x_gemini?.error;
+            if (err) {
+              onMessage(`Error: ${err}`, true);
+              return;
+            }
+            str += received?.choices?.[0]?.delta?.content || '';
+            onMessage(str || '');
           }
-          str += received?.choices?.[0]?.delta?.content || '';
-          onMessage(str || '');
         } catch (error) {
-          onMessage(`${error}`, true);
-          console.error('Error fetching data:', error);
+          // Skip invalid chunks silently
+          console.debug('Skipping invalid chunk');
+          continue;
         }
       }
     }
@@ -175,6 +220,7 @@ export async function fetchDataAsStream(url: string, data: any, onMessage: any, 
     if (host === "openai") {
       const stream = events(response);
       for await (const event of stream) {
+        if (!event.data) continue;
         try {
           const received = JSON.parse(event.data || '');
           const err = received?.x_openai?.error;
