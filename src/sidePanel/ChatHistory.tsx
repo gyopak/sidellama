@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { DeleteIcon } from '@chakra-ui/icons';
-import { Box, IconButton, Text } from '@chakra-ui/react';
+import { Box, IconButton, Text, Button } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import localforage from 'localforage';
 
@@ -44,6 +43,13 @@ export const ChatHistory = ({ loadChat }) => {
     });
   };
 
+  // Add deleteAll function
+  const deleteAll = async () => {
+    const keys = await localforage.keys();
+    await Promise.all(keys.map(key => localforage.removeItem(key)));
+    setMessages([]);
+  };
+
   return (
     <Box
       height="100%"
@@ -54,6 +60,27 @@ export const ChatHistory = ({ loadChat }) => {
       top="0rem"
       width="100%"
     >
+      <Box 
+        display="flex" 
+        justifyContent="flex-end" 
+        pr={4} 
+        mb={4}
+      >
+        <Button
+          leftIcon={<DeleteIcon />}
+          background="var(--bg)"
+          border="2px solid var(--text)"
+          borderRadius={16}
+          color="var(--text)"
+          fontSize="md"
+          fontWeight={800}
+          _hover={{ background: 'var(--active)' }}
+          onClick={deleteAll}
+        >
+          Delete All
+        </Button>
+      </Box>
+
       {uniqueDates.map(date => (
         <Box key={date} mb="2rem">
           <Text

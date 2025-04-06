@@ -27,6 +27,25 @@ tiny browser-augmented chat client for open-source language models.
 
 Check out the [documentation page](/DOCS.md)
 
+### Available Personas
+
+SideLlama comes with three distinct personas to suit different needs:
+
+1. **Sidellama** - Academic paper analysis specialist
+   - Analyzes research papers with precision
+   - Provides structured breakdowns of arguments and findings
+   - Generates insightful questions based on the content
+
+2. **Jan** - Strategic problem-solving expert
+   - Excels at logical analysis and long-term planning
+   - Breaks down complex problems systematically
+   - Provides structured, step-by-step solutions
+
+3. **Bruce** - All-purpose assistant
+   - Direct and efficient communication style
+   - Explains complex topics with simple language
+   - Provides straightforward feedback and solutions
+
 ## community
 
 Check out the [discord community](https://discord.gg/2pFtRgqp)
