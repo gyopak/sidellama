@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Button, Input } from '@chakra-ui/react';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import { Box, Button, IconButton, Input } from '@chakra-ui/react';
 import { useConfig } from './ConfigContext';
 import toast from 'react-hot-toast';
 import { GEMINI_URL } from './constants';
@@ -54,17 +55,22 @@ export const ConnectGemini = () => {
         value={apiKey}
         onChange={e => setApiKey(e.target.value)}
       />
-      <Button
-        _hover={{ background: 'var(--active)', border: '2px solid var(--text)' }}
+      <IconButton
+        isRound
+        _hover={{
+          background: 'var(--active)',
+          border: '2px solid var(--text)'
+        }}
+        aria-label="Toggle visibility"
         background="var(--active)"
         border="2px solid var(--text)"
-        borderRadius={16}
         color="var(--text)"
+        fontSize="19px"
+        icon={visibleApiKeys ? <ViewOffIcon /> : <ViewIcon />}
         size="sm"
+        variant="solid"
         onClick={() => setVisibleApiKeys(!visibleApiKeys)}
-      >
-        {visibleApiKeys ? 'Hide' : 'Show'}
-      </Button>
+      />
       {!isConnected && (
         <Button
           _hover={{ background: 'var(--active)', border: '2px solid var(--text)' }}
