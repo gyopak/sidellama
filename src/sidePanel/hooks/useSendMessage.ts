@@ -39,7 +39,9 @@ const useSendMessage = (
     const persona = config?.personas[config?.persona];
     const pageString = JSON.parse(localStorage.getItem('pagestring') || '{}');
     const pageHtml = JSON.parse(localStorage.getItem('pagehtml') || '{}');
-    const currentPageContent = config?.chatMode === 'page' && (config?.pageMode === 'html' ? pageHtml : pageString);
+    const currentPageContent = config?.chatMode === 'page' && 
+      !window.location.href.startsWith('chrome://') && 
+      (config?.pageMode === 'html' ? pageHtml : pageString);
 
     const charLimit = 1000 * (config?.contextLimit || 1);
     const limitedContent = charLimit && currentPageContent?.substr?.(0, charLimit);

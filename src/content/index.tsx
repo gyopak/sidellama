@@ -1,21 +1,29 @@
 import { contentLoaded } from 'src/state/slices/content';
 import { createStoreProxy } from 'src/state/store';
 import PortNames from '../types/PortNames';
-
 import CursorController from './controllers/CursorController';
 
-const initialize = async () => {
-  const store = createStoreProxy(PortNames.ContentPort);
+// Wrap in IIFE to allow early return
+(async () => {
+  // Skip chrome:// URLs early
+  if (window.location.protocol === 'chrome:') {
+    console.debug('Skipping chrome:// URL');
+    return;
+  }
 
-  const controllers = [
-    new CursorController()
-  ];
+  const initialize = async () => {
+    const store = createStoreProxy(PortNames.ContentPort);
 
-  await store.ready();
-  await Promise.all(controllers.map(controller => controller.register()));
-  store.dispatch(contentLoaded());
-};
+    const controllers = [
+      new CursorController()
+    ];
 
-initialize();
+    await store.ready();
+    await Promise.all(controllers.map(controller => controller.register()));
+    store.dispatch(contentLoaded());
+  };
+
+  await initialize();
+})();
 
 export {};

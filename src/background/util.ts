@@ -7,14 +7,30 @@ export async function getCurrentTab() {
 }
 
 export async function injectContentScript(tabId: number) {
-  console.log('injecting content script');
+  try {
+    // Get tab info to check URL
+    const tab = await chrome.tabs.get(tabId);
+    
+    // Skip chrome:// URLs early
+    if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
+      console.debug('Skipping content script injection for restricted URL:', tab.url);
+      return;
+    }
 
-  chrome.scripting.executeScript({
-    // @ts-ignore
-    target: { tabId },
-    files: [
-      'assets/vendor.js',
-      'content.js'
-    ]
-  });
+    console.log('injecting content script');
+
+    await chrome.scripting.executeScript({
+      // @ts-ignore
+      target: { tabId },
+      files: [
+        'assets/vendor.js',
+        'content.js'
+      ]
+    }).catch(err => {
+      console.debug('Script injection failed:', err);
+    });
+  } catch (err) {
+    console.debug('Tab access failed:', err);
+    return;
+  }
 }
