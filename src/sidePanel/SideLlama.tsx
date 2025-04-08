@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 import {
   Box,
   Container,
@@ -23,6 +23,7 @@ import { downloadImage, downloadJson, downloadText } from './messageUtils';
 import { Send } from './Send';
 import { Settings } from './Settings';
 import { setTheme, themes } from './Themes';
+import toast from 'react-hot-toast';
 
 function bridge() {
   const response = JSON.stringify({
@@ -33,22 +34,28 @@ function bridge() {
   return response;
 }
 
+// Modify the injectBridge function
 async function injectBridge() {
   const queryOptions = { active: true, lastFocusedWindow: true };
-
-  // `tab` will either be a `tabs.Tab` instance or `undefined`.
   const [tab] = await chrome.tabs.query(queryOptions);
-  if (!tab?.id) return;
-  chrome.scripting
-    .executeScript({
+  
+  // Add early return for restricted URLs
+  if (!tab?.id || tab.url?.startsWith('chrome://') || tab.url?.startsWith('chrome-extension://')) {
+    console.debug('Skipping injection for restricted URL:', tab?.url);
+    return;
+  }
+
+  try {
+    const result = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: bridge
-    })
-    .then(result => {
-      const res = JSON.parse(result?.[0]?.result || '{}');
-      localStorage.setItem('pagestring', JSON.stringify(res?.text || ''));
-      localStorage.setItem('pagehtml', JSON.stringify(res?.html || ''));
     });
+    const res = JSON.parse(result?.[0]?.result || '{}');
+    localStorage.setItem('pagestring', JSON.stringify(res?.text || ''));
+    localStorage.setItem('pagehtml', JSON.stringify(res?.html || ''));
+  } catch (err) {
+    console.debug('Script injection failed:', err);
+  }
 }
 
 const generateChatId = () => `chat_${Math.random().toString(16).slice(2)}`;
@@ -210,12 +217,22 @@ const SideLlama = () => {
         {!settingsMode && !historyMode && messages.length === 0 && config?.chatMode === "page" && (
           <Box bottom="4rem" left="0.5rem" position="absolute">
             <MessageTemplate onClick={async () => {
+              const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+              if (!tab?.url || tab.url.startsWith('chrome')) {
+                toast.error('Cannot access chrome-related pages');
+                return;
+              }
               await onSend('extract data');
             }}
             >
               extract data
             </MessageTemplate>
             <MessageTemplate onClick={async () => {
+              const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+              if (!tab?.url || tab.url.startsWith('chrome')) {
+                toast.error('Cannot access chrome-related pages');
+                return;
+              }
               await onSend('summarize content');
             }}
             >
