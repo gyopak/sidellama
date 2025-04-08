@@ -25,6 +25,10 @@ class CursorController implements ContentProvider {
     const cursorPosition = { x: e.clientX, y: e.clientY };
     this.store.dispatch(setCursorPosition(cursorPosition));
   };
+
+  cleanup() {
+    document.removeEventListener('mousemove', this.handleMouseMove);
+  }
 }
 
 export default CursorController;
