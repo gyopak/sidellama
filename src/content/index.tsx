@@ -5,14 +5,18 @@ import CursorController from './controllers/CursorController';
 
 // Wrap in IIFE to allow early return
 (async () => {
-  // Skip chrome:// URLs early
-  if (window.location.protocol === 'chrome:') {
-    console.debug('Skipping chrome:// URL');
-    return;
-  }
+  try {
+    // Skip chrome:// URLs early
+    if (window.location.protocol === 'chrome:') {
+      console.debug('Skipping chrome:// URL');
+      return;
+    }
 
-  const initialize = async () => {
     const store = createStoreProxy(PortNames.ContentPort);
+    
+    store.port.onDisconnect.addListener(() => {
+      console.debug('Store port disconnected');
+    });
 
     const controllers = [
       new CursorController()
@@ -21,9 +25,9 @@ import CursorController from './controllers/CursorController';
     await store.ready();
     await Promise.all(controllers.map(controller => controller.register()));
     store.dispatch(contentLoaded());
-  };
-
-  await initialize();
+  } catch (err) {
+    console.debug('Content script error:', err);
+  }
 })();
 
 export {};

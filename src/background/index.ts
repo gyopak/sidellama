@@ -30,34 +30,44 @@ chrome.tabs.onUpdated
   });
 
 chrome.runtime.onConnect.addListener(port => {
-  port.onMessage.addListener(async msg => {
-    if (port.name === PortNames.SidePanelPort) {
-      if (msg.type === 'init') {
-        console.log('panel opened');
-
-        await storage.setItem('panelOpen', true);
-
-        port.onDisconnect.addListener(async () => {
-          await storage.setItem('panelOpen', false);
-          console.log('panel closed');
-          console.log('port disconnected: ', port.name);
-        });
-
-        const tab = await getCurrentTab();
-
-        if (!tab?.id) {
-          console.error("Couldn't get current tab");
-          return;
+  const handleMessage = async (msg) => {
+    try {
+      if (port.name === PortNames.SidePanelPort) {
+        if (msg.type === 'init') {
+          console.log('panel opened');
+  
+          await storage.setItem('panelOpen', true);
+  
+          port.onDisconnect.addListener(async () => {
+            await storage.setItem('panelOpen', false);
+            console.log('panel closed');
+            console.log('port disconnected: ', port.name);
+          });
+  
+          const tab = await getCurrentTab();
+  
+          if (!tab?.id) {
+            console.error("Couldn't get current tab");
+            return;
+          }
+  
+          injectContentScript(tab.id);
+  
+          port.postMessage({
+            type: 'handle-init',
+            message: 'panel open'
+          });
         }
-
-        injectContentScript(tab.id);
-
-        port.postMessage({
-          type: 'handle-init',
-          message: 'panel open'
-        });
       }
+    } catch (err) {
+      console.debug('Port message handling error:', err);
     }
+  };
+
+  port.onMessage.addListener(handleMessage);
+  port.onDisconnect.addListener(() => {
+    console.debug('Port disconnected:', port.name);
+    port.onMessage.removeListener(handleMessage);
   });
 });
 
