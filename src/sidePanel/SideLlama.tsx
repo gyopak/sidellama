@@ -14,7 +14,7 @@ import useSendMessage from './hooks/useSendMessage';
 import { useUpdateModels } from './hooks/useUpdateModels';
 import { AddToChat } from './AddToChat';
 import { Background } from './Background';
-import { ChatHistory, ChatMessage } from './ChatHistory';
+import { ChatHistory, ChatMessage, deleteAll } from './ChatHistory';  // Add this import
 import { useConfig } from './ConfigContext';
 import { Header } from './Header';
 import { Input } from './Input';
@@ -180,6 +180,7 @@ const SideLlama = () => {
           setHistoryMode={setHistoryMode}
           setSettingsMode={setSettingsMode}
           settingsMode={settingsMode}
+          deleteAll={deleteAll}  // Add this prop
         />
         {settingsMode && <Settings />}
         {!settingsMode && !historyMode && messages.length > 0 && (

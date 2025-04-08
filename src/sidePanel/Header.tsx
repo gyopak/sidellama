@@ -220,7 +220,8 @@ export const Header = ({
   settingsMode = false,
   setSettingsMode = _s => {},
   historyMode = false,
-  setHistoryMode = _s => {}
+  setHistoryMode = _s => {},
+  deleteAll = () => window.deleteAllChats?.() // Change this line
 }) => {
   const { config, updateConfig } = useConfig();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -291,7 +292,21 @@ export const Header = ({
           {!historyMode && settingsMode && <VersionInfo />}
           {!historyMode && settingsMode && <Docs />}
           {!historyMode && settingsMode && <Donate />}
-          {historyMode && <Badge>chat history</Badge>}
+          {historyMode && (
+            <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+              <Badge>chat history</Badge>
+              <IconButton
+                aria-label="Delete all"
+                as={motion.div}
+                borderRadius={16}
+                icon={<DeleteIcon color="var(--text)" fontSize="xl" />}
+                variant="outlined"
+                whileHover={{ rotate: '15deg', cursor: 'pointer' }}
+                onClick={deleteAll}
+                mr={2}
+              />
+            </Box>
+          )}
         </Box>
         {!settingsMode && !historyMode && (
           <IconButton

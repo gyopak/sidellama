@@ -43,12 +43,17 @@ export const ChatHistory = ({ loadChat }) => {
     });
   };
 
-  // Add deleteAll function
+  // Export this function so Header can use it
   const deleteAll = async () => {
     const keys = await localforage.keys();
     await Promise.all(keys.map(key => localforage.removeItem(key)));
     setMessages([]);
   };
+
+  // Pass deleteAll up to parent
+  useEffect(() => {
+    window.deleteAllChats = deleteAll;
+  }, []);
 
   return (
     <Box
@@ -60,27 +65,6 @@ export const ChatHistory = ({ loadChat }) => {
       top="0rem"
       width="100%"
     >
-      <Box 
-        display="flex" 
-        justifyContent="flex-end" 
-        pr={4} 
-        mb={4}
-      >
-        <Button
-          leftIcon={<DeleteIcon />}
-          background="var(--bg)"
-          border="2px solid var(--text)"
-          borderRadius={16}
-          color="var(--text)"
-          fontSize="md"
-          fontWeight={800}
-          _hover={{ background: 'var(--active)' }}
-          onClick={deleteAll}
-        >
-          Delete All
-        </Button>
-      </Box>
-
       {uniqueDates.map(date => (
         <Box key={date} mb="2rem">
           <Text
